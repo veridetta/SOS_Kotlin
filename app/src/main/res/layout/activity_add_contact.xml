@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:id="@+id/coordinator"
+    tools:context=".ui.AddContactActivity">
+    <!-- Button to go back to SellerActivity fragment home -->
+    <!-- NestedScrollView for scrolling content -->
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <androidx.core.widget.NestedScrollView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            app:layout_behavior="@string/appbar_scrolling_view_behavior">
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="@dimen/_8sdp"
+                android:layout_marginTop="@dimen/_10sdp"
+                android:orientation="vertical">
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:padding="@dimen/_10sdp">
+                    <ImageView
+                        android:layout_width="@dimen/_30sdp"
+                        android:layout_height="@dimen/_30sdp"
+                        android:background="@drawable/ic_user_add"
+                        android:backgroundTint="@color/black"
+                        android:layout_marginEnd="8dp" />
+                    <TextView
+                        android:id="@+id/tvAdd"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:textStyle="bold"
+                        android:text="@string/add_contact"
+                        android:textSize="@dimen/_14sdp" />
+                </LinearLayout>
+                <!-- TextInputLayout for product name -->
+                <com.google.android.material.textfield.TextInputLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/rounded_button_background"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal">
+                        <ImageView
+                            android:layout_width="@dimen/_40sdp"
+                            android:layout_height="@dimen/_40sdp"
+                            android:src="@drawable/ic_user"
+                            app:tint="@color/white"
+                            android:layout_gravity="center_vertical"
+                            android:background="@drawable/background_rounded_blue"
+                            android:layout_marginRight="@dimen/_5sdp" />
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/etName"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:hint="@string/name"
+                            android:background="@null" />
+
+                    </LinearLayout>
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <!-- TextInputLayout for product description -->
+                <com.google.android.material.textfield.TextInputLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/_8sdp"
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/rounded_button_background"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal">
+
+                        <ImageView
+                            android:layout_width="@dimen/_40sdp"
+                            android:layout_height="@dimen/_40sdp"
+                            android:src="@drawable/ic_phone"
+                            app:tint="@color/white"
+                            android:layout_gravity="center_vertical"
+                            android:background="@drawable/background_rounded_blue"
+                            android:layout_marginRight="@dimen/_5sdp" />
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/etPhone"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:inputType="number"
+                            android:hint="@string/phone"
+                            android:background="@null" />
+
+                    </LinearLayout>
+                </com.google.android.material.textfield.TextInputLayout>
+                <androidx.appcompat.widget.AppCompatButton
+                    android:id="@+id/btnSave"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/save_contact"
+                    android:textSize="@dimen/_15sdp"
+                    android:layout_marginTop="16dp"
+                    android:textColor="@color/white"
+                    android:padding="@dimen/_8sdp"
+                    android:backgroundTint="@color/lightRed"
+                    android:background="@drawable/rounded_button_background" />
+
+            </LinearLayout>
+        </androidx.core.widget.NestedScrollView>
+
+        <ImageButton
+            android:id="@+id/btnBack"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="16dp"
+            android:layout_marginEnd="16dp"
+            android:layout_marginBottom="16dp"
+            android:background="@drawable/background_rounded_blue"
+            android:backgroundTint="@color/lightRed"
+            android:src="@drawable/ic_arrow_back"
+            app:tint="@android:color/white" />
+    </RelativeLayout>
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

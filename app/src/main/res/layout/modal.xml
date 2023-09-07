@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout android:id="@+id/modalContainer"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:alpha="0.7"
+        android:background="@color/black"/>
+    <androidx.cardview.widget.CardView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:cardCornerRadius="@dimen/_10sdp"
+        app:cardElevation="@dimen/_10sdp"
+        android:layout_centerVertical="true"
+        app:cardUseCompatPadding="true">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:layout_margin="@dimen/_10sdp"
+            android:background="@color/white"
+            android:padding="16dp">
+
+            <TextView
+                android:id="@+id/modalTitle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Pilih Aplikasi"
+                android:textSize="18sp"
+                android:textColor="@android:color/black"
+                android:gravity="center"/>
+
+            <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/whatsappButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="WhatsApp"
+                android:layout_marginTop="16dp"/>
+
+            <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/smsButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Pesan (SMS)"
+                android:layout_marginTop="8dp"/>
+            <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/closeButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Tutup"
+                android:layout_marginTop="8dp"/>
+        </LinearLayout>
+    </androidx.cardview.widget.CardView>
+</RelativeLayout>
+
