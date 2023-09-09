@@ -22,17 +22,23 @@ class WakelockService : Service() {
             PowerManager.FULL_WAKE_LOCK or PowerManager.ACQUIRE_CAUSES_WAKEUP,
             "MyApp:KeepScreenOn"
         )
+    }
 
-        // Mengaktifkan wakelock ketika layanan dibuat
-        if (!wakeLock.isHeld) {
-            wakeLock.acquire()
+    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        if (intent?.action == "ACTION_START_SERVICE" && !wakeLock.isHeld) {
+            // Mengaktifkan wakelock ketika layanan dimulai
+            wakeLock.acquire(30 * 60 * 1000L /*30 minutes*/)
+        } else if (intent?.action == "ACTION_STOP_SERVICE" && wakeLock.isHeld) {
+            // Menonaktifkan wakelock ketika layanan dihentikan
+            wakeLock.release()
+            stopSelf()
         }
+
+        return START_STICKY
     }
 
     override fun onDestroy() {
         super.onDestroy()
-
-        // Melepas wakelock ketika layanan dihancurkan
         if (wakeLock.isHeld) {
             wakeLock.release()
         }

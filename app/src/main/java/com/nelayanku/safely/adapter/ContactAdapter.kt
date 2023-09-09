@@ -5,6 +5,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.nelayanku.safely.R
@@ -20,7 +21,9 @@ class ContactAdapter(
     class ContactViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val tvName: TextView = itemView.findViewById(R.id.tvName)
         val tvPhone: TextView = itemView.findViewById(R.id.tvPhone)
-        val btnUtama : TextView = itemView.findViewById(R.id.btnUtama)
+        val btnUtama : LinearLayout = itemView.findViewById(R.id.btnUtama)
+        val btnEdit : LinearLayout = itemView.findViewById(R.id.btnEdit)
+        val lyButton : LinearLayout = itemView.findViewById(R.id.lyButton)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ContactViewHolder {

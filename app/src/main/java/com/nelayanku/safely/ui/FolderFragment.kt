@@ -37,20 +37,21 @@ class FolderFragment : Fragment() {
         val folder = File(requireContext().getExternalFilesDir("sos-app"), "media")
         val files = folder.listFiles()
         val mediaList = mutableListOf<MediaItem>()
-
-        for (file in files!!) {
-            val name = file.name
-            ///menghitung ukuran, jika lebih dari 1MB maka akan dijadikan MB
-            val size = if (file.length() / (1024 * 1024) > 1) {
-                "${file.length() / (1024 * 1024)} MB"
-            } else {
-                "${file.length() / 1024} KB"
+        if (files != null) {
+                for (file in files!!) {
+                    val name = file.name
+                    ///menghitung ukuran, jika lebih dari 1MB maka akan dijadikan MB
+                    val size = if (file.length() / (1024 * 1024) > 1) {
+                        "${file.length() / (1024 * 1024)} MB"
+                    } else {
+                        "${file.length() / 1024} KB"
+                    }
+                    val lastModified = SimpleDateFormat("dd/MM/yyyy").format(Date(file.lastModified()))
+                    //ambil type file
+                    val type = name.substring(name.lastIndexOf(".") + 1)
+                    // Tambahkan data media ke daftar
+                    mediaList.add(MediaItem(name, "", size, lastModified, type))
             }
-            val lastModified = SimpleDateFormat("dd/MM/yyyy").format(Date(file.lastModified()))
-            //ambil type file
-            val type = name.substring(name.lastIndexOf(".") + 1)
-            // Tambahkan data media ke daftar
-            mediaList.add(MediaItem(name, "",size, lastModified, type))
         }
         // Inisialisasi adapter dengan daftar data media
         recyclerView.apply {

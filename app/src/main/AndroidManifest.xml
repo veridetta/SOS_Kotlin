@@ -27,6 +27,7 @@
     <uses-permission android:name="android.permission.USE_FULL_SCREEN_INTENT" />
     <uses-permission android:name="android.permission.MICROPHONE" />
 
+
     <uses-feature
         android:name="android.hardware.camera.front"
         android:required="false" />
@@ -88,11 +89,11 @@
             android:enabled="true"
             android:exported="false" />
         <service
-            android:name=".service.ShakeDetectorService"
-            android:enabled="true"
-            android:exported="false" />
+            android:name=".service.ShakeDetectorService" />
         <service android:name=".service.RecorderService" />
         <service android:name=".service.RecordingService" />
+        <service android:name=".service.ScheduledRecordingService" />
+
     </application>
 
 </manifest>

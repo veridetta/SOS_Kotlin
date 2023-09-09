@@ -74,14 +74,12 @@ class HomeFragment : Fragment(), SurfaceHolder.Callback  {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireActivity())
         init(view)
         // Memeriksa dan meminta izin-izin yang diperlukan jika belum diizinkan
         checkAndRequestPermissions()
-        getLastLocation()
         initMedia()
         btnClick()
-
+        getLastLocation()
     }
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -115,6 +113,20 @@ class HomeFragment : Fragment(), SurfaceHolder.Callback  {
         mSurfaceHolder = mSurfaceView!!.holder
         mSurfaceHolder!!.addCallback(this)
         mSurfaceHolder!!.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS)
+        //ambil shared references untuk cbShake
+        val sharedPreferences = requireContext().getSharedPreferences("MyPrefs", Context.MODE_PRIVATE)
+        val shake = sharedPreferences.getBoolean("shake", false)
+        if (shake){
+            cbShake.isChecked = true
+            //aktifan service
+            val serviceIntent = Intent(requireContext(), ShakeDetectorService::class.java)
+            requireActivity().startService(serviceIntent)
+        }else{
+            cbShake.isChecked = false
+            //stop service
+            val serviceIntent = Intent(requireContext(), ShakeDetectorService::class.java)
+            requireActivity().stopService(serviceIntent)
+        }
     }
     private fun btnClick(){
         cbShowPreview.setOnClickListener {
@@ -153,7 +165,6 @@ class HomeFragment : Fragment(), SurfaceHolder.Callback  {
                 } // Simpan perubahan
                 //aktifkan service
                 val serviceIntent = Intent(requireContext(), ShakeDetectorService::class.java)
-                requireActivity().stopService(serviceIntent)
                 requireActivity().startService(serviceIntent)
                 Toast.makeText(requireContext(), "Shake", Toast.LENGTH_SHORT).show()
             } else {
@@ -253,6 +264,9 @@ class HomeFragment : Fragment(), SurfaceHolder.Callback  {
         //imgCamera, imgVideo, imgAudio diklik maka akan checkMedia
         imgCamera.setOnClickListener {
             isCamera = true
+            isVideo = false
+            isAudio = false
+
             checkMedia()
             val intent = Intent(requireContext(), RecorderService::class.java)
             intent.putExtra("picture", true)
@@ -272,6 +286,8 @@ class HomeFragment : Fragment(), SurfaceHolder.Callback  {
         }
         imgVideo.setOnClickListener {
             isVideo = true
+            isCamera = false
+            isAudio = false
             if(isRecording){
                 requireActivity().stopService(Intent(requireContext(), RecorderService::class.java))
                 Toast.makeText(requireContext(), "Rekaman dihentikan", Toast.LENGTH_SHORT).show()
@@ -290,6 +306,8 @@ class HomeFragment : Fragment(), SurfaceHolder.Callback  {
         }
         imgAudio.setOnClickListener {
             isAudio = true
+            isCamera = false
+            isVideo = false
             checkMedia()
             if(isRecording){
                 requireActivity().stopService(Intent(requireContext(), RecordingService::class.java))
@@ -333,12 +351,13 @@ class HomeFragment : Fragment(), SurfaceHolder.Callback  {
         }
     }
     private fun getLastLocation() {
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireActivity())
         fusedLocationClient.lastLocation
             .addOnSuccessListener { location ->
                 // Dapatkan latitude dan longitude di sini
                  latitude = location?.latitude ?: 0.0
                  longitude = location?.longitude ?: 0.0
-                // Tambahkan kode untuk menangani lokasi yang didapatkan
+                // Tambahkan kode untuk menangani lokasi yang didapatkans
                 tvLat.text = "Latitude "+ latitude.toString()
                 tvLong.text = "Longitude " + longitude.toString()
                 val addres = getAddress(requireContext(), latitude, longitude)
@@ -357,12 +376,13 @@ class HomeFragment : Fragment(), SurfaceHolder.Callback  {
             }
             .addOnFailureListener { exception ->
                 // Handle error jika gagal mendapatkan lokasi
+                tvLat.text = "Gagal mendapatkan lokasi."
+                tvLong.text = "Gagal mendapatkan lokasi"
             }
     }
     private fun getAddress(context: Context, latitude: Double, longitude: Double): String {
         val geocoder = Geocoder(context, Locale.getDefault())
         var addressText = ""
-
         try {
             val addresses = geocoder.getFromLocation(latitude, longitude, 1)
 

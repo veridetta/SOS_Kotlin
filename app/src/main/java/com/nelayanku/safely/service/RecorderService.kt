@@ -27,7 +27,7 @@ class RecorderService : Service() {
     private var mSurfaceHolder: SurfaceHolder? = null
     private var mRecordingStatus = false
     private var mMediaRecorder: MediaRecorder? = null
-    private var recordingDuration = 0
+    private var recordingDuration = 1
     var preview = false
     var picture = false
     override fun onCreate() {
@@ -63,6 +63,8 @@ class RecorderService : Service() {
             Log.d("RecorderService", "startRecording")
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.GINGERBREAD) {
                 mServiceCamera = Camera.open(Camera.CameraInfo.CAMERA_FACING_FRONT)
+                //mengatur kamera agar potrait
+                mServiceCamera!!.setDisplayOrientation(90)
             }
             val params = mServiceCamera!!.parameters
             mServiceCamera!!.parameters = params

@@ -1,7 +1,10 @@
 package com.nelayanku.safely.ui
 
+import android.app.AlarmManager
 import android.app.DatePickerDialog
+import android.app.PendingIntent
 import android.app.TimePickerDialog
+import android.content.Context
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
@@ -18,6 +21,7 @@ import com.nelayanku.safely.model.Contact
 import com.nelayanku.safely.model.Jadwal
 import com.nelayanku.safely.readContactsFromFile
 import com.nelayanku.safely.readJadwalFromFile
+import com.nelayanku.safely.service.RecordingAlarmReceiver
 import com.nelayanku.safely.writeContactsToFile
 import com.nelayanku.safely.writeJadwalToFile
 import java.text.SimpleDateFormat
@@ -78,6 +82,8 @@ class AddJadwalActivity : AppCompatActivity() {
                 val uid = UUID.randomUUID().toString()
                 val contact = Jadwal(sTanggal, sWaktu, sDurasi, sMode,uid)
                 val contacts = readJadwalFromFile(this)
+                // Buat jadwal berdasarkan input pengguna
+                scheduleRecording(sTanggal, sWaktu, sDurasi, sMode)
                 // Tambahkan objek Contact baru ke daftar kontak
                 contacts.add(contact)
                 // Simpan ulang data kontak ke file JSON
@@ -128,4 +134,46 @@ class AddJadwalActivity : AppCompatActivity() {
         )
         timePickerDialog.show()
     }
+    private fun scheduleRecording(tanggal: String, waktu: String, durasi: String, mode: String) {
+        // Parsing tanggal dan waktu dari input pengguna ke dalam bentuk yang sesuai
+        val dateTimeFormat = SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault())
+        val dateTimeString = "$tanggal $waktu"
+        val timestamp = dateTimeFormat.parse(dateTimeString)?.time ?: 0
+
+        // Buat dua intent yang berbeda, satu untuk memulai dan satu untuk menghentikan perekaman
+        val startIntent = Intent(this, RecordingAlarmReceiver::class.java)
+        startIntent.action = "START_RECORDING_ACTION"
+        // Sisipkan data tambahan seperti tanggal, waktu, dan durasi ke dalam intent ini
+        startIntent.putExtra("tanggal", tanggal)
+        startIntent.putExtra("waktu", waktu)
+        startIntent.putExtra("durasi", durasi)
+        startIntent.putExtra("mode", mode)
+
+        val stopIntent = Intent(this, RecordingAlarmReceiver::class.java)
+        stopIntent.action = "STOP_RECORDING_ACTION"
+        // Sisipkan data tambahan seperti tanggal, waktu, dan durasi ke dalam intent ini
+        stopIntent.putExtra("tanggal", tanggal)
+        stopIntent.putExtra("waktu", waktu)
+        stopIntent.putExtra("durasi", durasi)
+        stopIntent.putExtra("mode", mode)
+
+        // Buat PendingIntent untuk masing-masing intent
+        val startPendingIntent = PendingIntent.getBroadcast(this, 0, startIntent, PendingIntent.FLAG_UPDATE_CURRENT)
+        val stopPendingIntent = PendingIntent.getBroadcast(this, 1, stopIntent, PendingIntent.FLAG_UPDATE_CURRENT)
+
+        // Gunakan AlarmManager untuk menjadwalkan alarm sesuai dengan tanggal dan waktu yang diinginkan
+        val alarmManager = getSystemService(Context.ALARM_SERVICE) as AlarmManager
+
+        // Anda dapat mengatur waktu alarm berdasarkan tanggal dan waktu yang telah di-parse
+        alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, timestamp, startPendingIntent)
+
+        // Anda juga perlu mengatur alarm lain untuk menghentikan perekaman setelah durasi tertentu
+        val durasiMillis = durasi.toInt() * 60 * 1000 // Durasi dalam milidetik
+        val stopTimestamp = timestamp + durasiMillis
+        alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, stopTimestamp, stopPendingIntent)
+
+        // Pastikan untuk menangani izin yang diperlukan jika alarm harus berjalan di latar belakang
+    }
+
+
 }

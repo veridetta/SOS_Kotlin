@@ -14,6 +14,7 @@ import android.widget.SeekBar
 import android.widget.Toast
 import androidx.appcompat.widget.SwitchCompat
 import com.nelayanku.safely.R
+import com.nelayanku.safely.service.ShakeDetectorService
 import com.nelayanku.safely.service.WakelockService
 
 // TODO: Rename parameter arguments, choose names that match
@@ -74,6 +75,7 @@ class SettingFragment : Fragment() {
             override fun onProgressChanged(seekBar: SeekBar?, progress: Int, p2: Boolean) {
                 // TODO Auto-generated method stub
                 shakeValue = progress
+
             }
             override fun onStartTrackingTouch(seekBar: SeekBar?) {
                 // TODO Auto-generated method stub
@@ -84,19 +86,26 @@ class SettingFragment : Fragment() {
                 val editor = sharedPreferences.edit()
                 editor.putInt("shakeValue", shakeValue)
                 editor.apply()
-                //toast
-                val serviceIntent = Intent(requireContext(), WakelockService::class.java)
-                requireActivity().stopService(serviceIntent)
+                //terapkan pada shakedetector untuk mengubah sensitivitas (ShakedetectorService)
+                val serviceIntent = Intent(requireContext(), ShakeDetectorService::class.java)
                 requireActivity().startService(serviceIntent)
                 Toast.makeText(requireContext(), "Saved", Toast.LENGTH_SHORT).show()
             }
         })
         swScreen.setOnCheckedChangeListener { buttonView, isChecked ->
-            isScreenOn = isChecked
-            Toast.makeText(requireContext(), "Saved", Toast.LENGTH_SHORT).show()
-            val serviceIntent = Intent(requireContext(), WakelockService::class.java)
-            requireActivity().startService(serviceIntent)
+            val intent = Intent(requireContext(), WakelockService::class.java)
+
+            if (isChecked) {
+                // Ketika switch diaktifkan (ON), maka kita memulai layanan
+                intent.action = "ACTION_START_SERVICE"
+                requireContext().startService(intent)
+            } else {
+                // Ketika switch dimatikan (OFF), maka kita menghentikan layanan
+                intent.action = "ACTION_STOP_SERVICE"
+                requireContext().stopService(intent)
+            }
         }
+
     }
     fun initSharedPref(){
         //ambil value shake dan screen dari sharedpreferences

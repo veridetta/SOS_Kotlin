@@ -3,14 +3,20 @@ import android.app.Service
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
+import android.hardware.Camera
 import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.hardware.SensorManager
+import android.media.MediaRecorder
 import android.os.Build
+import android.os.Handler
 import android.os.IBinder
 import android.os.VibrationEffect
 import android.os.Vibrator
+import android.text.format.DateFormat
+import java.io.File
+import java.util.Date
 import kotlin.math.sqrt
 
 class ShakeDetectorService : Service(), SensorEventListener {
@@ -28,10 +34,22 @@ class ShakeDetectorService : Service(), SensorEventListener {
         sharedPreferences = getSharedPreferences("MyPrefs", Context.MODE_PRIVATE)
         // Mengambil sensitivitas dari SharedPreferences saat service dibuat
         sensitivityThreshold = sharedPreferences.getInt("shakeValue", 10)
-        sensorManager.registerListener(this, accelerometer, SensorManager.SENSOR_DELAY_NORMAL)
+        // Mengambil status checkbox dari SharedPreferences
+        val isShakeDetectorEnabled = sharedPreferences.getBoolean("shake", false)
+        if (isShakeDetectorEnabled) {
+            sensorManager.registerListener(this, accelerometer, SensorManager.SENSOR_DELAY_NORMAL)
+        }
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        sharedPreferences = getSharedPreferences("MyPrefs", Context.MODE_PRIVATE)
+        // Mengambil sensitivitas dari SharedPreferences saat service dibuat
+        sensitivityThreshold = sharedPreferences.getInt("shakeValue", 10)
+        // Mengambil status checkbox dari SharedPreferences
+        val isShakeDetectorEnabled = sharedPreferences.getBoolean("shake", false)
+        if (isShakeDetectorEnabled) {
+            sensorManager.registerListener(this, accelerometer, SensorManager.SENSOR_DELAY_NORMAL)
+        }
         return START_STICKY
     }
 
@@ -58,11 +76,74 @@ class ShakeDetectorService : Service(), SensorEventListener {
 
                 if (acceleration > sensitivityThreshold) {
                     // Device is shaken with the desired sensitivity, trigger vibration
-                    val vibrator = getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                        vibrator.vibrate(VibrationEffect.createOneShot(200, VibrationEffect.DEFAULT_AMPLITUDE))
-                    } else {
-                        vibrator.vibrate(200)
+                    var modex = ""
+                    var mode = "Belakang"
+                    if(mode== "Depan"){
+                        modex = "camera_front"
+                    }else{
+                        modex = "camera_back"
+                    }
+                    val mMediaRecorder = MediaRecorder()
+                    // Setel kamera sesuai dengan mode yang diterima
+                    val cameraId = when (modex) {
+                        "camera_front" -> Camera.CameraInfo.CAMERA_FACING_FRONT
+                        "camera_back" -> Camera.CameraInfo.CAMERA_FACING_BACK
+                        else -> Camera.CameraInfo.CAMERA_FACING_FRONT // Atur default sesuai kebutuhan Anda
+                    }
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.GINGERBREAD) {
+                        mMediaRecorder.setCamera(Camera.open(cameraId))
+                    }
+                    mMediaRecorder.setAudioSource(MediaRecorder.AudioSource.MIC)
+                    mMediaRecorder.setVideoSource(MediaRecorder.VideoSource.CAMERA)
+                    mMediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP)
+                    mMediaRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB)
+                    mMediaRecorder.setVideoEncoder(MediaRecorder.VideoEncoder.H264)
+                    val photoDirectory = File(getExternalFilesDir("sos-app"), "media")
+                    // Membuat direktori jika belum ada
+                    if (!photoDirectory.exists()) {
+                        photoDirectory.mkdirs()
+                    }
+                    mMediaRecorder.setOutputFile(
+                        photoDirectory.toString() + "/" +
+                                DateFormat.format("yyyy-MM-dd_kk-mm-ss", Date().time) +
+                                ".mp4"
+                    )
+                    try {
+                        mMediaRecorder.prepare()
+                        // Schedule the stopRecording() method to be called after the specified duration
+                        //start
+                        val recordingDuration = 15
+                        // Mulai perekaman
+                        mMediaRecorder.start()
+                        val vibrator = getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                            vibrator.vibrate(VibrationEffect.createOneShot(200, VibrationEffect.DEFAULT_AMPLITUDE))
+                        } else {
+                            vibrator.vibrate(200)
+                        }
+                        val handler = Handler()
+                        handler.postDelayed({
+                            mMediaRecorder.stop()
+                            mMediaRecorder.reset()
+                            mMediaRecorder.release()
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                                vibrator.vibrate(VibrationEffect.createOneShot(200, VibrationEffect.DEFAULT_AMPLITUDE))
+                            } else {
+                                vibrator.vibrate(200)
+                            }
+                        },(recordingDuration * 1000 * 60).toLong()) // Convert duration to milliseconds
+                    } catch (e: Exception) {
+                        // Tangani jika terjadi kesalahan saat memulai perekaman
+                        e.printStackTrace()
+                        // Hentikan dan lepaskan MediaRecorder jika terjadi kesalahan
+                        mMediaRecorder.reset()
+                        mMediaRecorder.release()
+                        val vibrator = getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                            vibrator.vibrate(VibrationEffect.createOneShot(200, VibrationEffect.DEFAULT_AMPLITUDE))
+                        } else {
+                            vibrator.vibrate(200)
+                        }
                     }
                 }
             }
@@ -78,8 +159,8 @@ class ShakeDetectorService : Service(), SensorEventListener {
     }
 
     override fun onDestroy() {
-        super.onDestroy()
-        sensorManager.unregisterListener(this)
+       // super.onDestroy()
+        //sensorManager.unregisterListener(this)
     }
 }
 

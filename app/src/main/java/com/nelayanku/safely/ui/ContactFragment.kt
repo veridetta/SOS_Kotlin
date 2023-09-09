@@ -1,11 +1,15 @@
 package com.nelayanku.safely.ui
 
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Intent
+import android.database.Cursor
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.provider.ContactsContract
+import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
@@ -23,6 +27,7 @@ import com.nelayanku.safely.R
 import com.nelayanku.safely.adapter.ContactAdapter
 import com.nelayanku.safely.model.Contact
 import com.nelayanku.safely.readContactsFromFile
+import com.nelayanku.safely.service.RecorderService
 import com.nelayanku.safely.writeContactsToFile
 import org.json.JSONObject
 import java.io.File
@@ -123,8 +128,9 @@ class ContactFragment : Fragment() {
         }
         btnAddFromContact.setOnClickListener{
             // Buat intent untuk membuka aplikasi kontak
-            val contactIntent = Intent(Intent.ACTION_PICK, ContactsContract.Contacts.CONTENT_URI)
-            startActivityForResult(contactIntent, CONTACT_PICK_REQUEST)
+            //val contactIntent = Intent(Intent.ACTION_PICK, ContactsContract.Contacts.CONTENT_URI)
+            //startActivityForResult(contactIntent, CONTACT_PICK_REQUEST)
+            selectContact()
 
         }
         btnDefaultMessage.setOnClickListener{
@@ -135,6 +141,15 @@ class ContactFragment : Fragment() {
     }
     //contact_pick_request
     private val CONTACT_PICK_REQUEST = 1
+    fun selectContact() {
+        // Start an activity for the user to pick a phone number from contacts
+        val intent = Intent(Intent.ACTION_PICK).apply {
+            type = ContactsContract.CommonDataKinds.Phone.CONTENT_TYPE
+        }
+        if (intent.resolveActivity(requireContext().packageManager) != null) {
+            startActivityForResult(intent, CONTACT_PICK_REQUEST)
+        }
+    }
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
 
@@ -151,21 +166,24 @@ class ContactFragment : Fragment() {
     }
     private fun processAndSaveContact(contactUri: Uri) {
         // Gunakan ContentResolver untuk mengambil data kontak
-        val cursor = requireContext().contentResolver.query(contactUri, null, null, null, null)
+        val projection: Array<String> = arrayOf(ContactsContract.CommonDataKinds.Phone.NUMBER)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+            requireContext().contentResolver.query(contactUri, projection, null, null, null).use { cursor ->
+                // If the cursor returned is valid, get the phone number
+                var number = ""
+                var name = ""
+                if (cursor!!.moveToFirst()) {
+                    val numberIndex = cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER)
+                    number = cursor.getString(numberIndex)
+                }
 
-        if (cursor != null && cursor.moveToFirst()) {
-            // Periksa apakah kolom DISPLAY_NAME dan Phone.NUMBER ada dalam hasil query
-            val nameColumnIndex = cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME)
-            val phoneNumberColumnIndex = cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER)
-
-            if (nameColumnIndex != -1 && phoneNumberColumnIndex != -1) {
-                // Ambil data kontak yang diperlukan seperti nama dan nomor telepon
-                val name = cursor.getString(nameColumnIndex)
-                val phoneNumber = cursor.getString(phoneNumberColumnIndex)
-
+                val c: Cursor =  requireActivity().managedQuery(contactUri, null, null, null, null)
+                if(c.moveToFirst()){
+                    name = c.getString(c.getColumnIndex(ContactsContract.Contacts.DISPLAY_NAME))
+                }
                 val uid = UUID.randomUUID().toString()
                 // Buat objek Contact baru
-                val contact = Contact(name, phoneNumber, false, uid)
+                val contact = Contact(name, number, false, uid)
                 val contacts = readContactsFromFile(requireContext())
 
                 // Tambahkan objek Contact baru ke daftar kontak
@@ -183,16 +201,9 @@ class ContactFragment : Fragment() {
                     startActivity(intent)
                 }, 1000)
 
-            } else {
-                // Kolom yang dibutuhkan tidak ditemukan, lakukan penanganan kesalahan
-                Toast.makeText(requireContext(), "Kolom yang dibutuhkan tidak ditemukan dalam hasil query.", Toast.LENGTH_SHORT).show()
             }
-
-            // Tutup cursor
-            cursor.close()
         }
     }
-
 
     //fungsi ubah contact
     private fun ubahContact(contact: Contact) {
@@ -212,8 +223,10 @@ class ContactFragment : Fragment() {
             // Simpan kembali data kontak ke file JSON
             writeContactsToFile(requireContext(), contacts)
         }
-        //notify data set changed
-        adapter.notifyDataSetChanged()
+        //load fragment
+        val intent = Intent(requireContext(), MainActivity::class.java)
+        intent.putExtra("fragment", "contact")
+        startActivity(intent)
         //snakbar pada fragment
         Snackbar.make(requireView(), "Kontak utama berhasil diubah", Snackbar.LENGTH_SHORT).show()
     }
@@ -231,6 +244,14 @@ class ContactFragment : Fragment() {
             // Simpan kembali data kontak ke file JSON
             writeContactsToFile(requireContext(), contacts)
         }
+    }
+    private fun editContact(contact: Contact) {
+        val intent = Intent(requireContext(), AddContactActivity::class.java)
+        intent.putExtra("nama", contact.name)
+        intent.putExtra("phone", contact.phone)
+        intent.putExtra("uid", contact.uid)
+        intent.putExtra("edit", true)
+        requireActivity().startService(intent)
     }
     companion object {
         /**

@@ -53,20 +53,76 @@
                     />
             </LinearLayout>
         </LinearLayout>
-        <TextView
-            android:layout_width="wrap_content"
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@color/white"
+            android:layout_marginTop="@dimen/_8sdp"
+            android:layout_marginBottom="@dimen/_8sdp"/>
+        <LinearLayout
+            android:id="@+id/lyButton"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:id="@+id/btnUtama"
-            android:backgroundTint="@color/gray"
-            android:background="@drawable/rounded_button_background"
-            android:textColor="@color/white"
-            android:textSize="@dimen/_10sdp"
-            android:layout_marginLeft="@dimen/_10sdp"
-            android:paddingLeft="@dimen/_19sdp"
-            android:paddingRight="@dimen/_19sdp"
-            android:paddingTop="@dimen/_3sdp"
-            android:paddingBottom="@dimen/_3sdp"
-            android:text="@string/jadikan_utama"/>
+            android:layout_gravity="end"
+            android:gravity="end"
+            android:weightSum="1">
+            <LinearLayout
+                android:id="@+id/btnUtama"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@drawable/rounded_button_background"
+                android:backgroundTint="@color/gdYellow"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+                <ImageView
+                    android:layout_width="@dimen/_30sdp"
+                    android:layout_height="@dimen/_30sdp"
+                    android:src="@drawable/ic_utama"
+                    app:tint="@color/white"
+                    android:layout_gravity="center_vertical"
+                    android:background="@drawable/background_rounded_blue"
+                    android:backgroundTint="@color/gdGreen"
+                    android:layout_marginRight="@dimen/_5sdp"/>
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:enabled="false"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:textSize="@dimen/_10sdp"
+                    android:layout_marginRight="@dimen/_8sdp"
+                    android:hint="Jadikan Utama"
+                    android:background="@null" />
+            </LinearLayout>
+            <LinearLayout
+                android:id="@+id/btnEdit"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@drawable/rounded_button_background"
+                android:gravity="center_vertical"
+                android:layout_marginLeft="@dimen/_13sdp"
+                android:orientation="horizontal">
+                <ImageView
+                    android:layout_width="@dimen/_30sdp"
+                    android:layout_height="@dimen/_30sdp"
+                    android:src="@drawable/ic_edit"
+                    app:tint="@color/white"
+                    android:layout_gravity="center_vertical"
+                    android:background="@drawable/background_rounded_blue"
+                    android:layout_marginRight="@dimen/_5sdp"/>
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/editTextEmail"
+                    android:enabled="false"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_marginRight="@dimen/_8sdp"
+                    android:textSize="@dimen/_10sdp"
+                    android:hint="Edit"
+                    android:background="@null" />
+            </LinearLayout>
+        </LinearLayout>
     </LinearLayout>
 
 </androidx.cardview.widget.CardView>
