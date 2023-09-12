@@ -8,6 +8,7 @@ import android.os.Build
 import android.os.Handler
 import android.os.IBinder
 import android.util.Log
+import android.widget.Toast
 import com.nelayanku.myapplication.StringHelper
 import com.nelayanku.safely.R
 import java.io.File
@@ -98,6 +99,9 @@ class RecordingService : Service() {
             recorder!!.stop()
             recorder!!.release()
             recorder = null
+            //toast
+            Toast.makeText(baseContext, "Recording Stopped", Toast.LENGTH_SHORT).show()
+            Log.d("RecorderService", "stopRecording")
         }
     }
 }

@@ -2,6 +2,7 @@ package com.nelayanku.safely.service
 
 import android.annotation.SuppressLint
 import android.app.Service
+import android.content.Context
 import android.content.Intent
 import android.hardware.Camera
 import android.media.MediaRecorder
@@ -61,10 +62,21 @@ class RecorderService : Service() {
         try {
             Toast.makeText(baseContext, "Recording Started", Toast.LENGTH_SHORT).show()
             Log.d("RecorderService", "startRecording")
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.GINGERBREAD) {
-                mServiceCamera = Camera.open(Camera.CameraInfo.CAMERA_FACING_FRONT)
-                //mengatur kamera agar potrait
-                mServiceCamera!!.setDisplayOrientation(90)
+            //ambil camera mode dari sharedpreferences
+            val sharedPreferences = getSharedPreferences("MyPrefs", Context.MODE_PRIVATE)
+            val mode = sharedPreferences.getString("mode", "Depan")
+            if(mode=="Depan"){
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.GINGERBREAD) {
+                    mServiceCamera = Camera.open(Camera.CameraInfo.CAMERA_FACING_FRONT)
+                    //mengatur kamera agar potrait
+                    mServiceCamera!!.setDisplayOrientation(90)
+                }
+            }else{
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.GINGERBREAD) {
+                    mServiceCamera = Camera.open(Camera.CameraInfo.CAMERA_FACING_BACK)
+                    //mengatur kamera agar potrait
+                    mServiceCamera!!.setDisplayOrientation(90)
+                }
             }
             val params = mServiceCamera!!.parameters
             mServiceCamera!!.parameters = params
@@ -88,7 +100,8 @@ class RecorderService : Service() {
             }
             if (preview) {
 
-            } else if(picture) {
+            }
+            else if(picture) {
                 // Membuat nama file gambar berdasarkan timestamp
                 val timeStamp = SimpleDateFormat("yyyyMMddHHmmss", Locale.US).format(Date())
                 val photoDirectory = File(getExternalFilesDir("sos-app"), "media")
@@ -121,7 +134,7 @@ class RecorderService : Service() {
                         e.printStackTrace()
                     }
                 })
-                mRecordingStatus = true
+                mRecordingStatus = false
             }else{
                 mServiceCamera!!.unlock()
                 mMediaRecorder = MediaRecorder()

@@ -5,6 +5,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import android.widget.EditText
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
@@ -15,6 +16,8 @@ class ContactAdapter(
     private val contactList: List<Contact>,
     val context: Context,
     private val onEditClickListener: (Contact) -> Unit,
+    private val onUbahClickListener: (Contact) -> Unit,
+    private val onDeleteClickListener: (Contact) -> Unit
     ) :
     RecyclerView.Adapter<ContactAdapter.ContactViewHolder>() {
 
@@ -24,6 +27,8 @@ class ContactAdapter(
         val btnUtama : LinearLayout = itemView.findViewById(R.id.btnUtama)
         val btnEdit : LinearLayout = itemView.findViewById(R.id.btnEdit)
         val lyButton : LinearLayout = itemView.findViewById(R.id.lyButton)
+        val btnDelete : LinearLayout = itemView.findViewById(R.id.btnDelete)
+        val etUtama : EditText = itemView.findViewById(R.id.etUtama)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ContactViewHolder {
@@ -38,7 +43,13 @@ class ContactAdapter(
         holder.tvPhone.text = currentContact.phone
         holder.btnUtama.setOnClickListener { onEditClickListener(currentContact) }
         if (currentContact.utama){
-            holder.btnUtama.visibility = View.GONE
+            holder.etUtama.setText("Terpilih")
+        }
+        holder.btnEdit.setOnClickListener {
+            onUbahClickListener(currentContact)
+        }
+        holder.btnDelete.setOnClickListener {
+            onDeleteClickListener(currentContact)
         }
     }
 

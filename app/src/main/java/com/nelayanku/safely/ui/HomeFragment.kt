@@ -32,6 +32,7 @@ import java.util.Locale
 import android.os.Build
 import android.view.SurfaceHolder
 import android.view.SurfaceView
+import android.widget.LinearLayout
 
 import com.nelayanku.safely.service.RecorderService
 import com.nelayanku.safely.service.RecordingService
@@ -69,7 +70,7 @@ class HomeFragment : Fragment(), SurfaceHolder.Callback  {
     var isRecording = false
     var isRecordAudio = false
     lateinit var cameraView : CameraView
-    lateinit var framelayout : FrameLayout
+    lateinit var framelayout : LinearLayout
     private val PERMISSION_REQUEST_CODE = 101
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -135,7 +136,8 @@ class HomeFragment : Fragment(), SurfaceHolder.Callback  {
                 if (isCamera || isVideo){
                     //tampilkan surfaceView
                     isPreview = true
-                    mSurfaceView!!.visibility = View.VISIBLE;
+                    //mSurfaceView!!.visibility = View.VISIBLE;
+                    framelayout!!.visibility = View.GONE
                     intentPreview()
                 }else{
 
@@ -145,7 +147,8 @@ class HomeFragment : Fragment(), SurfaceHolder.Callback  {
             } else {
                 // Sembunyikan preview kamera
                 isPreview = false
-                mSurfaceView!!.setVisibility(View.GONE);
+                //mSurfaceView!!.setVisibility(View.GONE);
+                framelayout!!.visibility = View.VISIBLE
                 Toast.makeText(requireContext(), "Hide Preview", Toast.LENGTH_SHORT).show()
             }
         }
@@ -272,17 +275,6 @@ class HomeFragment : Fragment(), SurfaceHolder.Callback  {
             intent.putExtra("picture", true)
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             requireActivity().startService(intent)
-            //timer 1detik
-            val handler = android.os.Handler()
-            handler.postDelayed({
-                Toast.makeText(requireContext(), "Gambar diambil", Toast.LENGTH_SHORT).show()
-                //klik switchbutton sampe ke false
-                mSurfaceView!!.visibility = View.GONE;
-                cbShowPreview.isChecked = false
-                cameraActive.text = "Click to take!"
-                //stop
-                requireActivity().stopService(Intent(requireContext(), RecorderService::class.java))
-            }, 3000)
         }
         imgVideo.setOnClickListener {
             isVideo = true
@@ -317,6 +309,7 @@ class HomeFragment : Fragment(), SurfaceHolder.Callback  {
                 val intent = Intent(requireContext(), RecordingService::class.java)
                 audioActive.text = "Audio Recording"
                 Toast.makeText(requireContext(), "Rekaman dimulai", Toast.LENGTH_SHORT).show()
+                requireActivity().startService(intent)
                 isRecording = true
             }
         }

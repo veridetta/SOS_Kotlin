@@ -16,7 +16,8 @@ class MediaListAdapter(
     //klik tombol gdrive
     private val onGDriveClick: (MediaItem) -> Unit,
     //klik tombol delete
-    private val onDeleteClick: (MediaItem) -> Unit
+    private val onDeleteClick: (MediaItem) -> Unit,
+    private val onACtionClick: (MediaItem) -> Unit,
     ) :
     RecyclerView.Adapter<MediaListAdapter.ViewHolder>() {
 
@@ -28,6 +29,7 @@ class MediaListAdapter(
         val imgCover: ImageView = view.findViewById(R.id.imgCover)
         val btnGDrive: LinearLayout = view.findViewById(R.id.btnGDrive)
         val btnDelete: LinearLayout = view.findViewById(R.id.btnDelete)
+        val btnAction: LinearLayout = view.findViewById(R.id.btnAction)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -60,6 +62,10 @@ class MediaListAdapter(
         //klik tombol delete
         holder.btnDelete.setOnClickListener {
             onDeleteClick(mediaItem)
+        }
+        //klik tombol action
+        holder.btnAction.setOnClickListener {
+            onACtionClick(mediaItem)
         }
     }
 

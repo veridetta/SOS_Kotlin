@@ -6,6 +6,7 @@ import android.app.PendingIntent
 import android.app.TimePickerDialog
 import android.content.Context
 import android.content.Intent
+import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.Handler
@@ -153,7 +154,7 @@ class AddJadwalActivity : AppCompatActivity() {
         stopIntent.action = "STOP_RECORDING_ACTION"
         // Sisipkan data tambahan seperti tanggal, waktu, dan durasi ke dalam intent ini
         stopIntent.putExtra("tanggal", tanggal)
-        stopIntent.putExtra("waktu", waktu)
+        stopIntent.putExtra("waktu", waktu+durasi)
         stopIntent.putExtra("durasi", durasi)
         stopIntent.putExtra("mode", mode)
 
@@ -165,12 +166,16 @@ class AddJadwalActivity : AppCompatActivity() {
         val alarmManager = getSystemService(Context.ALARM_SERVICE) as AlarmManager
 
         // Anda dapat mengatur waktu alarm berdasarkan tanggal dan waktu yang telah di-parse
-        alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, timestamp, startPendingIntent)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, timestamp, startPendingIntent)
+        }
 
         // Anda juga perlu mengatur alarm lain untuk menghentikan perekaman setelah durasi tertentu
         val durasiMillis = durasi.toInt() * 60 * 1000 // Durasi dalam milidetik
         val stopTimestamp = timestamp + durasiMillis
-        alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, stopTimestamp, stopPendingIntent)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, stopTimestamp, stopPendingIntent)
+        }
 
         // Pastikan untuk menangani izin yang diperlukan jika alarm harus berjalan di latar belakang
     }

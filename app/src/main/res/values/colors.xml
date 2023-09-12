@@ -19,7 +19,9 @@
     <color name="colorPrimaryDark">#FFA9A9A9</color>
     <color name="colorAccent">#FFFFFFFF</color>
     <color name="gdGreen">#1FA463</color>
+    <color name="gdGreenLight">#2ABF6E</color>
     <color name="gdYellow">#FFD04B</color>
     <color name="gdBlue">#4688F4</color>
     <color name="gdBlueDark">#3D6EC9</color>
+    <color name="gdBlueLight">#5A9CF4</color>
 </resources>

@@ -13,11 +13,13 @@ import android.os.IBinder
 import android.os.VibrationEffect
 import android.os.Vibrator
 import android.text.format.DateFormat
+import androidx.annotation.RequiresApi
 import java.io.File
 import java.util.Calendar
 import java.util.Date
 
 class ScheduledRecordingService : Service() {
+    @RequiresApi(Build.VERSION_CODES.GINGERBREAD)
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         // Logika penjadwalan perekaman video akan ditempatkan di sini
         val alarmManager = getSystemService(Context.ALARM_SERVICE) as AlarmManager
@@ -58,78 +60,28 @@ class ScheduledRecordingService : Service() {
     override fun onBind(intent: Intent?): IBinder? {
         return null
     }
+    @RequiresApi(Build.VERSION_CODES.GINGERBREAD)
     private fun startRecording(tanggal: String, waktu: String, durasi: String, mode: String) {
-        // Inisialisasi MediaRecorder
-        var modex = ""
-        if(mode== "Depan"){
-            modex = "camera_front"
-        }else{
-            modex = "camera_back"
-        }
-        val mMediaRecorder = MediaRecorder()
-        // Setel kamera sesuai dengan mode yang diterima
-        val cameraId = when (modex) {
-            "camera_front" -> Camera.CameraInfo.CAMERA_FACING_FRONT
-            "camera_back" -> Camera.CameraInfo.CAMERA_FACING_BACK
-            else -> Camera.CameraInfo.CAMERA_FACING_FRONT // Atur default sesuai kebutuhan Anda
-        }
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.GINGERBREAD) {
-            mMediaRecorder.setCamera(Camera.open(cameraId))
-        }
-        mMediaRecorder.setAudioSource(MediaRecorder.AudioSource.MIC)
-        mMediaRecorder.setVideoSource(MediaRecorder.VideoSource.CAMERA)
-        mMediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP)
-        mMediaRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB)
-        mMediaRecorder.setVideoEncoder(MediaRecorder.VideoEncoder.H264)
-        val photoDirectory = File(getExternalFilesDir("sos-app"), "media")
-        // Membuat direktori jika belum ada
-        if (!photoDirectory.exists()) {
-            photoDirectory.mkdirs()
-        }
-        mMediaRecorder.setOutputFile(
-            photoDirectory.toString() + "/" +
-                    DateFormat.format("yyyy-MM-dd_kk-mm-ss", Date().time) +
-                    ".mp4"
-        )
-        try {
-            mMediaRecorder.prepare()
-            // Schedule the stopRecording() method to be called after the specified duration
-            //start
-            val recordingDuration = durasi.toInt() //dalam menit
-            // Mulai perekaman
-            mMediaRecorder.start()
-            val vibrator = getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                vibrator.vibrate(VibrationEffect.createOneShot(200, VibrationEffect.DEFAULT_AMPLITUDE))
-            } else {
-                vibrator.vibrate(200)
-            }
-            val handler = Handler()
-            handler.postDelayed({
-                mMediaRecorder.stop()
-                mMediaRecorder.reset()
-                mMediaRecorder.release()
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                    vibrator.vibrate(VibrationEffect.createOneShot(200, VibrationEffect.DEFAULT_AMPLITUDE))
-                } else {
-                    vibrator.vibrate(200)
-                }
-            },(recordingDuration * 1000 * 60).toLong()) // Convert duration to milliseconds
-        } catch (e: Exception) {
-            // Tangani jika terjadi kesalahan saat memulai perekaman
-            e.printStackTrace()
-            // Hentikan dan lepaskan MediaRecorder jika terjadi kesalahan
-            mMediaRecorder.reset()
-            mMediaRecorder.release()
-            val vibrator = getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                vibrator.vibrate(VibrationEffect.createOneShot(200, VibrationEffect.DEFAULT_AMPLITUDE))
-            } else {
-                vibrator.vibrate(200)
-            }
-        }
-
-        // ... (lanjutkan dengan kode lain yang diperlukan)
+        //simpan mode ke sharedpreferences
+        val sharedPreferences = getSharedPreferences("MyPrefs", Context.MODE_PRIVATE)
+        val editor = sharedPreferences.edit()
+        editor.putString("mode", mode)
+        editor.apply()
+        //startservice recorder
+        val intent = Intent(this, RecorderService::class.java)
+        intent.putExtra("tanggal", tanggal)
+        intent.putExtra("waktu", waktu)
+        intent.putExtra("durasi", durasi)
+        intent.putExtra("mode", mode)
+        startService(intent)
+        //handler sesuai durasi
+        val handler = Handler()
+        handler.postDelayed({
+            //intent stop service
+            val intentx = Intent(this, RecorderService::class.java)
+            intentx.action = "ACTION_STOP_SERVICE"
+            stopService(intent)
+        }, durasi.toLong() * 1000)
     }
 
 }

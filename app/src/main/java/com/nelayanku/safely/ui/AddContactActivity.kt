@@ -42,6 +42,11 @@ class AddContactActivity : AppCompatActivity() {
         etName = findViewById(R.id.etName)
         etPhone = findViewById(R.id.etPhone)
         btnSave = findViewById(R.id.btnSave)
+        var intentx = intent
+        name = intentx.getStringExtra("nama").toString()
+        phone = intentx.getStringExtra("phone").toString()
+        etName.setText(name)
+        etPhone.setText(phone)
     }
     fun btnClick(){
         btnSave.setOnClickListener {
@@ -58,8 +63,6 @@ class AddContactActivity : AppCompatActivity() {
                 Snackbar.make(it, "Data tidak boleh kosong", Snackbar.LENGTH_LONG).show()
             }else{
                 if(edit){
-                    name = intentx.getStringExtra("nama").toString()
-                    phone = intentx.getStringExtra("phone").toString()
                     val uid = intentx.getStringExtra("uid")
                     // Jika dalam mode edit, maka lakukan perubahan data kontak berdasarkan UID
 

@@ -108,15 +108,18 @@ class ContactFragment : Fragment() {
             adapter = ContactAdapter(
                 sortedContacts,
                 requireContext(),
-            ){ product ->
-                if (utamaTrueContacts.isNotEmpty()){
-                    val handler = Handler()
-                    handler.postDelayed({
-                        ubahContactUtama(product)
-                    }, 1000)
-                }
-                ubahContact(product)
-            }
+                { product ->
+                    if (utamaTrueContacts.isNotEmpty()){
+                        val handler = Handler()
+                        handler.postDelayed({
+                            ubahContactUtama(product)
+                        }, 1000)
+                    }
+                    ubahContact(product)
+                },
+                { product -> editContact(product) },
+                { product -> deleteContact(product) }
+            )
         }
 
     }
@@ -164,6 +167,7 @@ class ContactFragment : Fragment() {
             }
         }
     }
+    @SuppressLint("Range")
     private fun processAndSaveContact(contactUri: Uri) {
         // Gunakan ContentResolver untuk mengambil data kontak
         val projection: Array<String> = arrayOf(ContactsContract.CommonDataKinds.Phone.NUMBER)
@@ -251,7 +255,26 @@ class ContactFragment : Fragment() {
         intent.putExtra("phone", contact.phone)
         intent.putExtra("uid", contact.uid)
         intent.putExtra("edit", true)
-        requireActivity().startService(intent)
+        requireActivity().startActivity(intent)
+    }
+    private fun deleteContact(contact: Contact) {
+        // Baca data kontak dari file JSON
+        val contacts = readContactsFromFile(requireContext())
+        // Cari kontak dengan UID yang sesuai
+        val contactIndex = contacts.indexOfFirst { it.uid == contact.uid }
+        if (contactIndex != -1) {
+            // Jika kontak dengan UID yang sesuai ditemukan
+            // Hapus kontak dari daftar kontak
+            contacts.removeAt(contactIndex)
+            // Simpan kembali data kontak ke file JSON
+            writeContactsToFile(requireContext(), contacts)
+        }
+        //load fragment
+        val intent = Intent(requireContext(), MainActivity::class.java)
+        intent.putExtra("fragment", "contact")
+        startActivity(intent)
+        //snakbar pada fragment
+        Snackbar.make(requireView(), "Kontak berhasil dihapus", Snackbar.LENGTH_SHORT).show()
     }
     companion object {
         /**

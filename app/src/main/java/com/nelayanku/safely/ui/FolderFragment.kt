@@ -7,6 +7,8 @@ import android.os.Handler
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.content.FileProvider
+import androidx.core.net.toUri
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.GridLayoutManager
 import com.nelayanku.safely.R
@@ -15,6 +17,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.nelayanku.safely.adapter.ContactAdapter
 import com.nelayanku.safely.adapter.MediaListAdapter
 import com.nelayanku.safely.model.MediaItem
+import io.fotoapparat.BuildConfig
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -61,7 +64,8 @@ class FolderFragment : Fragment() {
             adapter = MediaListAdapter(
                 mediaList,
                 { file -> gDrive(file) },
-                { file -> deleteFile(file)}
+                { file -> deleteFile(file)},
+                { file -> openMedia(file) }
             )
         }
         return view
@@ -93,8 +97,18 @@ class FolderFragment : Fragment() {
                 //jika tipe jpg
                 if (file.name.substring(file.name.lastIndexOf(".") + 1) == "jpg") {
                     val shareIntent = Intent(Intent.ACTION_SEND)
+                    val uri = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                        FileProvider.getUriForFile(
+                            requireContext(),
+                            requireContext().opPackageName + ".provider",
+                            file
+                        )
+                    } else {
+                        TODO("VERSION.SDK_INT < Q")
+
+                    }
                     shareIntent.type = "image/jpeg"
-                    shareIntent.putExtra(Intent.EXTRA_STREAM, file)
+                    shareIntent.putExtra(Intent.EXTRA_STREAM, uri)
                     startActivity(Intent.createChooser(shareIntent, "Share Image"))
                 }else if(file.name.substring(file.name.lastIndexOf(".") + 1) == "ogg"){
                     val shareIntent = Intent(Intent.ACTION_SEND)
@@ -106,6 +120,70 @@ class FolderFragment : Fragment() {
                     shareIntent.type = "video/mp4"
                     shareIntent.putExtra(Intent.EXTRA_STREAM, file)
                     startActivity(Intent.createChooser(shareIntent, "Share Video"))
+                }
+            }
+        }
+    }
+    fun openMedia(filenya: MediaItem){
+        //ada media gambar audio dan video, saya ingin membukanya dengan aplikasi default
+        val folder = File(requireContext().getExternalFilesDir("sos-app"), "media")
+        val files = folder.listFiles()
+        for (file in files!!) {
+            if (file.name == filenya.name) {
+                //jika tipe jpg
+                if (file.name.substring(file.name.lastIndexOf(".") + 1) == "jpg") {
+                    val intent = Intent()
+                    intent.action = Intent.ACTION_VIEW
+
+                    val uri = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                        FileProvider.getUriForFile(
+                            requireContext(),
+                            requireContext().opPackageName + ".provider",
+                            file
+                        )
+                    } else {
+                        TODO("VERSION.SDK_INT < Q")
+
+                    }
+
+                    intent.setDataAndType(uri, "image/*")
+                    intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION) // Izinkan akses ke URI
+
+                    startActivity(intent)
+                }
+                else if(file.name.substring(file.name.lastIndexOf(".") + 1) == "ogg"){
+                    val intent = Intent()
+                    intent.action = Intent.ACTION_VIEW
+                    val uri = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                        FileProvider.getUriForFile(
+                            requireContext(),
+                            requireContext().opPackageName + ".provider",
+                            file
+                        )
+                    } else {
+                        TODO("VERSION.SDK_INT < Q")
+
+                    }
+                    intent.setDataAndType(uri, "audio/*")
+                    intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION) // Izinkan akses ke URI
+                    startActivity(intent)
+                }
+                else if(file.name.substring(file.name.lastIndexOf(".") + 1) == "mp4"){
+                    val intent = Intent()
+                    intent.action = Intent.ACTION_VIEW
+                    val uri = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                        FileProvider.getUriForFile(
+                            requireContext(),
+                            requireContext().opPackageName + ".provider",
+                            file
+                        )
+                    } else {
+                        TODO("VERSION.SDK_INT < Q")
+
+                    }
+                    intent.setDataAndType(uri, "video/*")
+                    intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION) // Izinkan akses ke URI
+                    startActivity(intent)
                 }
             }
         }

@@ -2,16 +2,23 @@ package com.nelayanku.safely.ui
 
 import android.content.Context
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
 import android.os.PowerManager
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.AdapterView
+import android.widget.ArrayAdapter
 import android.widget.Button
+import android.widget.CheckBox
 import android.widget.LinearLayout
 import android.widget.SeekBar
+import android.widget.Spinner
+import android.widget.TextView
 import android.widget.Toast
+import androidx.annotation.RequiresApi
 import androidx.appcompat.widget.SwitchCompat
 import com.nelayanku.safely.R
 import com.nelayanku.safely.service.ShakeDetectorService
@@ -27,6 +34,7 @@ private const val ARG_PARAM2 = "param2"
  * Use the [SettingFragment.newInstance] factory method to
  * create an instance of this fragment.
  */
+@RequiresApi(Build.VERSION_CODES.GINGERBREAD)
 class SettingFragment : Fragment() {
     // TODO: Rename and change types of parameters
     private var param1: String? = null
@@ -35,6 +43,11 @@ class SettingFragment : Fragment() {
     lateinit var btnTimer : LinearLayout
     lateinit var sbShake : SeekBar
     lateinit var swScreen : SwitchCompat
+    lateinit var tvShake : TextView
+    lateinit var cbVideo : CheckBox
+    lateinit var cbAudio : CheckBox
+    lateinit var cbPhoto : CheckBox
+    lateinit var spMode : Spinner
 
     var shakeValue : Int = 0
     var isScreenOn : Boolean = false
@@ -64,7 +77,17 @@ class SettingFragment : Fragment() {
         btnTimer = view?.findViewById(R.id.btnTimer)!!
         sbShake = view?.findViewById(R.id.sbShake)!!
         swScreen = view?.findViewById(R.id.swScreen)!!
+        tvShake = view?.findViewById(R.id.tvShake)!!
+        cbVideo = view?.findViewById(R.id.cbVideo)!!
+        cbAudio = view?.findViewById(R.id.cbAudio)!!
+        cbPhoto = view?.findViewById(R.id.cbPhoto)!!
+        spMode = view?.findViewById(R.id.spMode)!!
+        //set spMode ambil dari string
+        val mode = resources.getStringArray(R.array.cam_mode)
+        val adapter = context?.let { ArrayAdapter(it, android.R.layout.simple_spinner_dropdown_item, mode) }
+        spMode.adapter = adapter
     }
+
     fun btnClick(){
         btnTimer.setOnClickListener {
             //pindah ke jadwal activity
@@ -75,11 +98,13 @@ class SettingFragment : Fragment() {
             override fun onProgressChanged(seekBar: SeekBar?, progress: Int, p2: Boolean) {
                 // TODO Auto-generated method stub
                 shakeValue = progress
+                tvShake.text = "$shakeValue"    //set textview dengan value dari seekbar
 
             }
             override fun onStartTrackingTouch(seekBar: SeekBar?) {
                 // TODO Auto-generated method stub
             }
+            @RequiresApi(Build.VERSION_CODES.GINGERBREAD)
             override fun onStopTrackingTouch(seekBar: SeekBar?) {
                 // TODO Auto-generated method stub
                 val sharedPreferences = requireContext().getSharedPreferences("MyPrefs", Context.MODE_PRIVATE)
@@ -105,6 +130,52 @@ class SettingFragment : Fragment() {
                 requireContext().stopService(intent)
             }
         }
+        cbVideo.setOnClickListener {
+            //uncheck pada yang lain
+            cbAudio.isChecked = false
+            cbPhoto.isChecked = false
+            val sharedPreferences = requireContext().getSharedPreferences("MyPrefs", Context.MODE_PRIVATE)
+            val editor = sharedPreferences.edit()
+            editor.putBoolean("video", cbVideo.isChecked)
+            editor.putBoolean("audio", cbAudio.isChecked)
+            editor.putBoolean("photo", cbPhoto.isChecked)
+            editor.apply()
+        }
+        cbAudio.setOnClickListener {
+            //uncheck pada yang lain
+            cbVideo.isChecked = false
+            cbPhoto.isChecked = false
+            val sharedPreferences = requireContext().getSharedPreferences("MyPrefs", Context.MODE_PRIVATE)
+            val editor = sharedPreferences.edit()
+            editor.putBoolean("video", cbVideo.isChecked)
+            editor.putBoolean("audio", cbAudio.isChecked)
+            editor.putBoolean("photo", cbPhoto.isChecked)
+
+            editor.apply()
+        }
+        cbPhoto.setOnClickListener {
+            //uncheck pada yang lain
+            cbVideo.isChecked = false
+            cbAudio.isChecked = false
+            val sharedPreferences = requireContext().getSharedPreferences("MyPrefs", Context.MODE_PRIVATE)
+            val editor = sharedPreferences.edit()
+            editor.putBoolean("video", cbVideo.isChecked)
+            editor.putBoolean("audio", cbAudio.isChecked)
+            editor.putBoolean("photo", cbPhoto.isChecked)
+            editor.apply()
+        }
+        spMode.onItemSelectedListener = object : AdapterView.OnItemSelectedListener{
+            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long){
+                val sharedPreferences = requireContext().getSharedPreferences("MyPrefs", Context.MODE_PRIVATE)
+                val editor = sharedPreferences.edit()
+                editor.putString("mode", spMode.selectedItem.toString())
+                editor.apply()
+            }
+
+            override fun onNothingSelected(parent: AdapterView<*>?) {
+                // TODO Auto-generated method stub
+            }
+        }
 
     }
     fun initSharedPref(){
@@ -114,7 +185,22 @@ class SettingFragment : Fragment() {
         //isScreenOn = sharedPreferences.getBoolean("screen", false)
         //set value ke sbShake dan swScreen
         sbShake.progress = shakeValue
-        //swScreen.isChecked = isScreenOn
+        tvShake.text = "$shakeValue"
+        //ambil video,photo, audio
+        val video = sharedPreferences.getBoolean("video", false)
+        val audio = sharedPreferences.getBoolean("audio", false)
+        val photo = sharedPreferences.getBoolean("photo", false)
+        val mode = sharedPreferences.getString("mode", "Depan")
+        //set value ke spMode
+        if (mode.equals("Depan")){
+            spMode.setSelection(0)
+        }else{
+            spMode.setSelection(1)
+        }
+        //set value ke checkbox
+        cbVideo.isChecked = video
+        cbAudio.isChecked = audio
+        cbPhoto.isChecked = photo
     }
     val screen = false
     companion object {
