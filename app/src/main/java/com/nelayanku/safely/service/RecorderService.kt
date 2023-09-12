@@ -79,6 +79,8 @@ class RecorderService : Service() {
                 }
             }
             val params = mServiceCamera!!.parameters
+            //off shutter sound
+            params.set("camera-sound", 0)
             mServiceCamera!!.parameters = params
             val p = mServiceCamera!!.parameters
             val listPreviewSize = p.supportedPreviewSizes
@@ -91,6 +93,7 @@ class RecorderService : Service() {
             val previewSize = listPreviewSize[0]
             p.setPreviewSize(previewSize.width, previewSize.height)
             mServiceCamera!!.parameters = p
+
             try {
                 mServiceCamera!!.setPreviewDisplay(mSurfaceHolder)
                 mServiceCamera!!.startPreview()
