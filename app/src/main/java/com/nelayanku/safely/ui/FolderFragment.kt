@@ -148,7 +148,6 @@ class FolderFragment : Fragment() {
 
                     intent.setDataAndType(uri, "image/*")
                     intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION) // Izinkan akses ke URI
-
                     startActivity(intent)
                 }
                 else if(file.name.substring(file.name.lastIndexOf(".") + 1) == "ogg"){

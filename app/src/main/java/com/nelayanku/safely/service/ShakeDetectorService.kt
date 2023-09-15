@@ -103,6 +103,9 @@ class ShakeDetectorService : Service(), SensorEventListener {
 
                 val acceleration = sqrt((x * x + y * y + z * z).toDouble())
 
+                Log.d("ShakeDetectorService", "X is $x , Y is $y, Z is $z")
+                Log.d("ShakeDetectorService", "Acceleration is $acceleration m/s2")
+
                 if (acceleration > sensitivityThreshold) {
                     sharedPreferences = getSharedPreferences("MyPrefs", Context.MODE_PRIVATE)
                     val video = sharedPreferences.getBoolean("video", false)

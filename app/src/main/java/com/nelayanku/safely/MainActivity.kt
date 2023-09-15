@@ -41,6 +41,7 @@ class MainActivity : AppCompatActivity() {
         val intent = intent
         //dapatkan data dari intent
         val fragment = intent.getStringExtra("fragment")
+
         if (fragment != null) {
             if (fragment == "folder") {
                 val orderFragment = FolderFragment()

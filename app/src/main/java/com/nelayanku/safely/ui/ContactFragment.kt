@@ -106,7 +106,7 @@ class ContactFragment : Fragment() {
             layoutManager = GridLayoutManager(activity, 1)
             // set the custom adapter to the RecyclerView
             adapter = ContactAdapter(
-                sortedContacts,
+            sortedContacts,
                 requireContext(),
                 { product ->
                     if (utamaTrueContacts.isNotEmpty()){
@@ -130,9 +130,6 @@ class ContactFragment : Fragment() {
             startActivity(intent)
         }
         btnAddFromContact.setOnClickListener{
-            // Buat intent untuk membuka aplikasi kontak
-            //val contactIntent = Intent(Intent.ACTION_PICK, ContactsContract.Contacts.CONTENT_URI)
-            //startActivityForResult(contactIntent, CONTACT_PICK_REQUEST)
             selectContact()
 
         }
